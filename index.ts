@@ -6,6 +6,7 @@ import session from "express-session";
 
 import router from "./routes/index";
 import "./strategies/passport-github";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(session({ secret: 'nothing', resave: false, saveUninitialized: false }))
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
+app.use(cookieParser());
 
 // Routes
 app.use("/api", router);
