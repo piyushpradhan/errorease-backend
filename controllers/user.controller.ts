@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { generateResponse } from "../utils/response";
-import { getUserDetails as getUserDetailsService } from "../services/user";
+import { getUserDetails as getUserDetailsService } from "../services/user.service";
 
 export const getUserDetails = async (request: Request, response: Response) => {
   const user = request.user as any;
