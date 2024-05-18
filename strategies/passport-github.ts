@@ -22,7 +22,7 @@ passport.deserializeUser(function(obj, done) {
 export default passport.use(new Strategy({
   clientID: process.env.GITHUB_CLIENT_ID || "",
   clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-  callbackURL: "https://errorease.vercel.app/api/auth/callback/github"
+  callbackURL: "http://localhost:3000/api/auth/callback/github"
 }, function(accessToken: string, refreshToken: string, profile: any, done: any) {
   process.nextTick(function() {
     return done(null, profile)

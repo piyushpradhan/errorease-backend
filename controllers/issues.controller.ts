@@ -4,7 +4,7 @@ import {
   createIssue as createIssueService,
   updateIssue as updateIssueService,
   resolveIssue as resolveIssueService,
-} from "../services/issues";
+} from "../services/issues.service";
 import { generateResponse } from "../utils/response";
 
 export const getAllIssues = async (request: Request, response: Response) => {

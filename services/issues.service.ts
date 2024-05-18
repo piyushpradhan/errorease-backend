@@ -1,7 +1,6 @@
 import e from "../dbschema/edgeql-js";
 import { createClient } from "edgedb";
 import { LabelInput } from "../utils/types";
-import { on } from "events";
 
 const dbClient = createClient();
 
