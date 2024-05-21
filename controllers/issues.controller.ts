@@ -9,8 +9,9 @@ import { generateResponse } from "../utils/response";
 
 export const getAllIssues = async (request: Request, response: Response) => {
   const user = request.user as any;
+  console.log({ user });
   if (user) {
-    const issues = await getAllIssuesService({ uid: user.user.id });
+    const issues = await getAllIssuesService({ uid: user.id });
     const result = generateResponse({ data: issues });
     return response.send(result);
   }

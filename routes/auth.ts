@@ -1,4 +1,4 @@
-import express, { Router, Request, Response } from "express";
+import express, { Router, Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import passport from "passport";
@@ -7,7 +7,10 @@ dotenv.config();
 
 const router: Router = express.Router();
 
-router.post(
+const successLoginUrl = `${process.env.APP_URL}/dashboard`;
+const failureLoginUrl = `${process.env.APP_URL}/`;
+
+router.get(
   "/",
   passport.authenticate("github"),
   (request: Request, response: Response) => {
@@ -30,26 +33,38 @@ router.get("/logout", (request: Request, response: Response) => {
 
 router.get(
   "/github",
-  passport.authenticate("github", { scope: ["user:email"] }),
+  passport.authenticate("github", { scope: ["user:email", "user:profile"] }),
 );
 
 router.get(
   "/callback/github",
-  passport.authenticate("github", { scope: ["user:email"] }),
+  passport.authenticate("github"),
   (request: Request, response: Response) => {
     const user = request.user as any;
     if (process.env.ACCESS_TOKEN_SECRET && process.env.REFRESH_TOKEN_SECRET) {
-      const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
-      const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
+      const accessToken = jwt.sign(
+        { id: user.id },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
+      );
+      const refreshToken = jwt.sign(
+        { id: user.id },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
+      );
 
       response.setHeader("Set-Cookie", accessToken);
 
-      response.cookie("access_token", accessToken, { httpOnly: true, secure: true });
-      response.cookie("refresh_token", refreshToken, { httpOnly: true, secure: true });
+      response.cookie("access_token", accessToken);
+      response.cookie("refresh_token", refreshToken);
 
-      response.redirect("/api/auth/status");
+      response.appendHeader(
+        "Cookie",
+        `accessToken=${accessToken};refreshToken=${refreshToken}`,
+      );
+      response.redirect(successLoginUrl);
     }
-    throw new Error("Token secrets not found")
+    throw new Error("Token secrets not found");
   },
 );
 

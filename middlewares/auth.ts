@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import { extractTokensFromBearer } from "../utils/token";
 
 export const ensureAuthenticated = (
   request: Request,
@@ -10,19 +11,27 @@ export const ensureAuthenticated = (
     throw new Error("Token secrets not found");
   }
 
-  const token = request.cookies.access_token;
+  let accessToken = request.cookies.access_token;
+  let refreshToken = request.cookies.refresh_token;
 
-  if (!token) {
-    return response.sendStatus(401);
+  if (!accessToken) {
+    // Look for the token in auth bearer if they aren't present in cookies
+    if (request.headers.authorization) {
+      const { accessToken: access, refreshToken: refresh } = extractTokensFromBearer(request.headers.authorization);
+      accessToken = access;
+      refreshToken = refresh;
+    } else {
+      return response.sendStatus(401);
+    }
   }
 
   jwt.verify(
-    token,
+    accessToken,
     process.env.ACCESS_TOKEN_SECRET,
     (error: VerifyErrors | null, user: JwtPayload | string | undefined) => {
       if (error) {
         if (error.message === "jwt expired") {
-          return verifyRefreshToken(request, response, next, token);
+          return verifyRefreshToken(request, response, next, refreshToken);
         }
         return response.sendStatus(401);
       }
@@ -44,7 +53,7 @@ const verifyRefreshToken = (
   }
 
   jwt.verify(
-    request.cookies.refresh_token,
+    token,
     process.env.REFRESH_TOKEN_SECRET,
     (error: VerifyErrors | null, user: JwtPayload | string | undefined) => {
       if (error) {

@@ -6,7 +6,7 @@ dotenv.config();
 
 passport.serializeUser(function(user, done) {
   done(null, user);
-})
+});
 
 passport.deserializeUser(function(obj, done) {
   // TODO: Deserialize user using the database schema
@@ -19,13 +19,20 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj as Express.User);
 });
 
-export default passport.use(new Strategy({
-  clientID: process.env.GITHUB_CLIENT_ID || "",
-  clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-  callbackURL: "https://errorease-web.vercel.app/api/auth/callback/github"
-}, function(accessToken: string, refreshToken: string, profile: any, done: any) {
-  process.nextTick(function() {
-    return done(null, profile)
-  })
-}))
-
+export default passport.use(
+  new Strategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+      callbackURL: process.env.CALLBACK_URL || "",
+    },
+    function(
+      accessToken: string,
+      refreshToken: string,
+      profile: any,
+      done: any,
+    ) {
+      return done(null, profile);
+    },
+  ),
+);
