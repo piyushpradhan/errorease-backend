@@ -10,6 +10,9 @@ export const getAllIssues = async ({ uid }: { uid: string }) => {
     labels: {
       ...e.Label["*"],
     },
+    links: {
+      ...e.Link["*"],
+    },
     filter: e.op(issue.owner.uid, "=", `${uid}`),
   }));
 
