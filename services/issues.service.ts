@@ -196,6 +196,24 @@ export const resolveIssue = async ({ id }: { id: string }) => {
 };
 
 export const updateActiveStatus = async ({ id, isActive }: { id: string, isActive: boolean }) => {
+  if (!isActive) {
+    const deactivateIssueQuery = e.params(
+      {
+        issueId: e.uuid
+      },
+      (params) => e.update(e.Issue, (issue) => ({
+        filter: e.op(issue.id, "!=", params.issueId),
+        set: {
+          is_active: false
+        }
+      }))
+    )
+
+    await deactivateIssueQuery.run(dbClient, {
+      issueId: id
+    });
+  }
+
   const updateActiveStatusQuery = e.update(e.Issue, () => ({
     filter_single: { id },
     set: {
