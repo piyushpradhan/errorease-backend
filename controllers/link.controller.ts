@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { generateResponse } from "../utils/response";
 
-import { createLink as createLinkService } from "../services/link.service";
+import { createLink as createLinkService, updateLinks as updateLinkService } from "../services/link.service";
 
 export const createLink = async (request: Request, response: Response) => {
   const user = request.user as any;
@@ -18,3 +18,24 @@ export const createLink = async (request: Request, response: Response) => {
   );
 };
 
+
+export const updateLinks = async (request: Request, response: Response) => {
+  const user = request.user as any;
+  const { issueId, links } = request.body;
+
+  if (user) {
+    const updatedIssue = await updateLinkService({
+      links,
+      issueId,
+      uid: user.id
+    });
+
+    const result = generateResponse({ data: updatedIssue });
+
+    return response.send(result);
+  }
+
+  return response.send(
+    generateResponse({ statusCode: 401, error: "Unauthorized user", data: {} }),
+  );
+}

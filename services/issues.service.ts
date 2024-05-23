@@ -194,3 +194,15 @@ export const resolveIssue = async ({ id }: { id: string }) => {
   const result = await resolveIssueQuery.run(dbClient);
   return result;
 };
+
+export const updateActiveStatus = async ({ id, isActive }: { id: string, isActive: boolean }) => {
+  const updateActiveStatusQuery = e.update(e.Issue, () => ({
+    filter_single: { id },
+    set: {
+      is_active: isActive
+    }
+  }));
+
+  const result = await updateActiveStatusQuery.run(dbClient);
+  return result;
+}
