@@ -4,6 +4,7 @@ import {
   createIssue as createIssueService,
   updateIssue as updateIssueService,
   resolveIssue as resolveIssueService,
+  updateActiveStatus,
 } from "../services/issues.service";
 import { generateResponse } from "../utils/response";
 
@@ -75,3 +76,18 @@ export const resolveIssue = async (request: Request, response: Response) => {
     generateResponse({ statusCode: 401, error: "Unauthorized user", data: {} }),
   );
 };
+
+export const updateIssueActiveStatus = async (request: Request, response: Response) => {
+  const user = request.user as any;
+  const { id, isActive } = request.body;
+
+  if (user) {
+    const updatedIssue = await updateActiveStatus({ id, isActive });
+    const result = generateResponse({ data: updatedIssue });
+    return response.send(result);
+  }
+
+  return response.send(
+    generateResponse({ statusCode: 401, error: "Unauthorized user", data: {} })
+  )
+}
