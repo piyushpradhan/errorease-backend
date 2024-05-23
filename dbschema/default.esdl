@@ -21,6 +21,8 @@ module default {
     required issue: Issue {
       on target delete allow;
     };
+
+    constraint exclusive on (( .url, .issue));
   }
 
   type Label {

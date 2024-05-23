@@ -1,5 +1,5 @@
-import { Link } from "dbschema/edgeql-js/modules/schema";
 import e, { createClient } from "../dbschema/edgeql-js";
+import * as R from "ramda";
 
 const dbClient = createClient();
 
@@ -24,6 +24,7 @@ export const createLink = async ({ id, url, note }: { id: string, url: string, n
 
 export const updateLinks = async ({ links, uid, issueId }: { links: string[], uid: string, issueId: string }) => {
   try {
+    const uniqueLinks = R.uniq(links);
     const updateLinksQuery = e.params(
       {
         links: e.array(e.str),
@@ -36,12 +37,12 @@ export const updateLinks = async ({ links, uid, issueId }: { links: string[], ui
           issue: e.select(e.Issue, () => ({
             filter_single: { id: params.issueId }
           })),
-        })
+        }).unlessConflict()
       )
     )
 
-    await updateLinksQuery.run(dbClient, {
-      links: links,
+    const createdLinks = await updateLinksQuery.run(dbClient, {
+      links: uniqueLinks.filter((link) => link.length > 0),
       currentUserId: uid,
       issueId
     });
