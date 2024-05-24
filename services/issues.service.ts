@@ -37,7 +37,7 @@ export const createIssue = async ({
     created_at: e.datetime_current(),
     updated_at: e.datetime_current(),
     status: "Open",
-    is_active: true,
+    is_active: false,
     issue_map: "",
   });
 
