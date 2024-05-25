@@ -55,16 +55,10 @@ router.get(
 
       response.setHeader("Set-Cookie", accessToken);
 
-      response.cookie("access_token", accessToken);
-      response.cookie("refresh_token", refreshToken);
+      response.cookie("access_token", accessToken, { secure: process.env.NODE_ENV === "production", sameSite: "none", domain: process.env.APP_URL });
+      response.cookie("refresh_token", refreshToken, { secure: process.env.NODE_ENV === "production", sameSite: "none", domain: process.env.APP_URL });
 
-      console.log("DEBUG", { response });
-
-      response.appendHeader(
-        "Cookie",
-        `accessToken=${accessToken};refreshToken=${refreshToken}`,
-      );
-      response.redirect(successLoginUrl);
+      return response.redirect(successLoginUrl);
     }
     throw new Error("Token secrets not found");
   },

@@ -12,7 +12,6 @@ dotenv.config();
 
 const app = express();
 
-app.set("trust proxy", true);
 app.use(express.urlencoded({ extended: false }));
 if (process.env.SESSION_SECRET) {
   app.use(
@@ -20,14 +19,22 @@ if (process.env.SESSION_SECRET) {
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: false },
+      cookie: {
+        secure: false,
+        httpOnly: false,
+        sameSite: false,
+      },
     }),
   );
 } else {
   throw new Error("Session secret not found, please check your environment variables");
 }
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+  allowedHeaders: "*",
+  origin: "*",
+  credentials: true
+}));
 app.use(express.json());
 
 app.use(passport.initialize());
