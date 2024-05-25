@@ -12,10 +12,12 @@ dotenv.config();
 
 const app = express();
 
+app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: false }));
 if (process.env.SESSION_SECRET) {
   app.use(
     session({
+      name: "errorease-cookies",
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
@@ -23,6 +25,7 @@ if (process.env.SESSION_SECRET) {
         secure: true,
         httpOnly: false,
         sameSite: "none",
+        maxAge: 1000 * 60 * 60 * 48,
       },
     }),
   );
