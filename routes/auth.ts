@@ -55,8 +55,21 @@ router.get(
 
       response.setHeader("Set-Cookie", accessToken);
 
-      response.cookie("access_token", accessToken);
-      response.cookie("refresh_token", refreshToken);
+      response.cookie("access_token", accessToken, {
+        secure: true,
+        httpOnly: false,
+        sameSite: "none",
+        domain: "errorease-web.vercel.app",
+        path: "/"
+      });
+
+      response.cookie("refresh_token", refreshToken, {
+        secure: true,
+        httpOnly: false,
+        sameSite: "none",
+        domain: "errorease-web.vercel.app",
+        path: "/"
+      });
 
       return response.redirect(successLoginUrl);
     }

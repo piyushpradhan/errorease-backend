@@ -34,7 +34,6 @@ if (process.env.SESSION_SECRET) {
 }
 app.use(cookieParser());
 app.use(cors({
-  allowedHeaders: "*",
   origin: "*",
   credentials: true
 }));
