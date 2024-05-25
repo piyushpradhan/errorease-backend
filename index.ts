@@ -22,7 +22,7 @@ if (process.env.SESSION_SECRET) {
       cookie: {
         secure: false,
         httpOnly: false,
-        sameSite: false,
+        sameSite: "none",
       },
     }),
   );
