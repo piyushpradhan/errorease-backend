@@ -58,6 +58,8 @@ router.get(
       response.cookie("access_token", accessToken);
       response.cookie("refresh_token", refreshToken);
 
+      console.log("DEBUG", { response });
+
       response.appendHeader(
         "Cookie",
         `accessToken=${accessToken};refreshToken=${refreshToken}`,
