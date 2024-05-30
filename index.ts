@@ -22,10 +22,8 @@ if (process.env.SESSION_SECRET) {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true,
+        secure: false,
         httpOnly: false,
-        sameSite: "none",
-        maxAge: 1000 * 60 * 60 * 48,
       },
     }),
   );
@@ -33,10 +31,7 @@ if (process.env.SESSION_SECRET) {
   throw new Error("Session secret not found, please check your environment variables");
 }
 app.use(cookieParser());
-app.use(cors({
-  origin: "*",
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 app.use(passport.initialize());

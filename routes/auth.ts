@@ -8,12 +8,11 @@ dotenv.config();
 const router: Router = express.Router();
 
 const successLoginUrl = `${process.env.APP_URL}/dashboard`;
-const failureLoginUrl = `${process.env.APP_URL}/`;
 
 router.get(
   "/",
   passport.authenticate("github"),
-  (request: Request, response: Response) => {
+  (_request: Request, response: Response) => {
     response.sendStatus(200);
   },
 );
@@ -33,14 +32,24 @@ router.get("/logout", (request: Request, response: Response) => {
 
 router.get(
   "/github",
-  passport.authenticate("github", { scope: ["user:email", "user:profile"] }),
+  (request: Request, response: Response, next: NextFunction) => {
+    const { type } = request.query;
+    passport.authenticate("github", {
+      scope: ["user:email", "user:profile"],
+      state: JSON.stringify({ type: type ?? "app" })
+    })(request, response, next);
+  }
 );
 
 router.get(
   "/callback/github",
   passport.authenticate("github"),
   (request: Request, response: Response) => {
+    console.log("from callback", { request: request.query.state });
+    const state = request.query.state ? JSON.parse(request.query.state.toString()) : { type: "app" };
+    const type = state.type;
     const user = request.user as any;
+
     if (process.env.ACCESS_TOKEN_SECRET && process.env.REFRESH_TOKEN_SECRET) {
       const accessToken = jwt.sign(
         { id: user.id },
@@ -55,23 +64,23 @@ router.get(
 
       response.setHeader("Set-Cookie", accessToken);
 
-      response.cookie("access_token", accessToken, {
-        secure: true,
-        httpOnly: false,
-        sameSite: "none",
-        domain: "errorease-web.vercel.app",
-        path: "/"
-      });
+      response.cookie("access_token", accessToken);
 
-      response.cookie("refresh_token", refreshToken, {
-        secure: true,
-        httpOnly: false,
-        sameSite: "none",
-        domain: "errorease-web.vercel.app",
-        path: "/"
-      });
+      response.cookie("refresh_token", refreshToken);
 
-      return response.redirect(successLoginUrl);
+      if (type === "app") {
+        return response.redirect(successLoginUrl);
+      }
+
+      return response.send(`<script>
+          window.opener.postMessage(${JSON.stringify({ accessToken, refreshToken })}, "*");
+          window.close();
+        </script>`);
+    }
+    if (type === "extension") {
+      return response.send({
+        status: "failed",
+      });
     }
     throw new Error("Token secrets not found");
   },
