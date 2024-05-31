@@ -3,10 +3,13 @@ import dotenv from "dotenv";
 import express from "express";
 import passport from "passport";
 import session from "express-session";
+import { Server } from "socket.io";
 
 import router from "./routes/index";
 import "./strategies/passport-github";
 import cookieParser from "cookie-parser";
+import { createServer } from "http";
+import { getAllIssues } from "services/issues.service";
 
 dotenv.config();
 
@@ -40,6 +43,16 @@ app.use(passport.session());
 // Routes
 app.use("/api", router);
 
-app.listen(process.env.PORT || 3000, () => {
-  //   console.log(`Server is running on port ${process.env.PORT}`);
+const httpServer = createServer(app);
+
+export const io = new Server(httpServer, {
+  cors: {
+    origin: "*"
+  }
 });
+
+io.on("connection", (socket) => {
+  socket.emit("test", "test updated it");
+});
+
+httpServer.listen(process.env.PORT || 3000, () => { });

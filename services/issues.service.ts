@@ -1,6 +1,7 @@
 import e from "../dbschema/edgeql-js";
 import { createClient } from "edgedb";
 import { LabelInput } from "../utils/types";
+import { io } from "../";
 
 const dbClient = createClient();
 
@@ -17,6 +18,10 @@ export const getAllIssues = async ({ uid }: { uid: string }) => {
   }));
 
   const issues = await query.run(dbClient);
+
+  // Send updated values of all the issues the client
+  io.emit("updated:issues", issues);
+
   return issues || [];
 };
 
@@ -105,10 +110,13 @@ export const createIssue = async ({
 
   const result = await getUpdatedIssueQuery.run(dbClient);
 
+  await getAllIssues({ uid });
+
   return result;
 };
 
 export const updateIssue = async ({
+  uid,
   id,
   title,
   description,
@@ -117,6 +125,7 @@ export const updateIssue = async ({
   isActive,
   issueMap,
 }: {
+  uid: string;
   id: string;
   title?: string;
   description?: string;
@@ -180,10 +189,14 @@ export const updateIssue = async ({
   }));
 
   const result = await updatedIssueQuery.run(dbClient);
+
+  // Send updated values to the client
+  await getAllIssues({ uid });
+
   return result;
 };
 
-export const resolveIssue = async ({ id }: { id: string }) => {
+export const resolveIssue = async ({ id, uid }: { id: string, uid: string }) => {
   const resolveIssueQuery = e.update(e.Issue, () => ({
     filter_single: { id },
     set: {
@@ -192,10 +205,14 @@ export const resolveIssue = async ({ id }: { id: string }) => {
   }));
 
   const result = await resolveIssueQuery.run(dbClient);
+
+  // Send updated values to the client
+  await getAllIssues({ uid });
+
   return result;
 };
 
-export const updateActiveStatus = async ({ id, isActive }: { id: string, isActive: boolean }) => {
+export const updateActiveStatus = async ({ uid, id, isActive }: { uid: string, id: string, isActive: boolean }) => {
   if (!isActive) {
     const deactivateIssueQuery = e.params(
       {
@@ -222,5 +239,9 @@ export const updateActiveStatus = async ({ id, isActive }: { id: string, isActiv
   }));
 
   const result = await updateActiveStatusQuery.run(dbClient);
+
+  // Send updated issues to the client
+  await getAllIssues({ uid });
+
   return result;
 }

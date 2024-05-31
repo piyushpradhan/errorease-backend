@@ -10,7 +10,6 @@ import { generateResponse } from "../utils/response";
 
 export const getAllIssues = async (request: Request, response: Response) => {
   const user = request.user as any;
-  console.log({ user });
   if (user) {
     const issues = await getAllIssuesService({ uid: user.id });
     const result = generateResponse({ data: issues });
@@ -46,6 +45,7 @@ export const updateIssue = async (request: Request, response: Response) => {
 
   if (user) {
     const updatedIssue = await updateIssueService({
+      uid: user.id,
       id,
       title,
       description,
@@ -67,7 +67,7 @@ export const resolveIssue = async (request: Request, response: Response) => {
   const { id } = request.body;
 
   if (user) {
-    const resolvedIssue = await resolveIssueService({ id });
+    const resolvedIssue = await resolveIssueService({ id, uid: user.id });
     const result = generateResponse({ data: resolvedIssue });
     return response.send(result);
   }
@@ -82,7 +82,7 @@ export const updateIssueActiveStatus = async (request: Request, response: Respon
   const { id, isActive } = request.body;
 
   if (user) {
-    const updatedIssue = await updateActiveStatus({ id, isActive });
+    const updatedIssue = await updateActiveStatus({ id, isActive, uid: user.id });
     const result = generateResponse({ data: updatedIssue });
     return response.send(result);
   }
