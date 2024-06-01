@@ -1,5 +1,6 @@
 import e, { createClient } from "../dbschema/edgeql-js";
 import * as R from "ramda";
+import { getAllIssues } from "./issues.service";
 
 const dbClient = createClient();
 
@@ -41,7 +42,7 @@ export const updateLinks = async ({ links, uid, issueId }: { links: string[], ui
       )
     )
 
-    const createdLinks = await updateLinksQuery.run(dbClient, {
+    await updateLinksQuery.run(dbClient, {
       links: uniqueLinks.filter((link) => link.length > 0),
       currentUserId: uid,
       issueId
@@ -62,6 +63,9 @@ export const updateLinks = async ({ links, uid, issueId }: { links: string[], ui
     }));
 
     const result = await getUpdatedIssue.run(dbClient);
+
+    // Send updated issues to the client
+    await getAllIssues({ uid });
 
     return result;
   } catch (err) {

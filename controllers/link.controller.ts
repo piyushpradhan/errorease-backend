@@ -21,7 +21,7 @@ export const createLink = async (request: Request, response: Response) => {
 
 export const updateLinks = async (request: Request, response: Response) => {
   const user = request.user as any;
-  const { issueId, links } = request.body;
+  const { issueId, links = [] } = request.body;
 
   if (user) {
     const updatedIssue = await updateLinkService({
