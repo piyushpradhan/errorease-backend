@@ -73,3 +73,36 @@ export const updateLinks = async ({ links, uid, issueId }: { links: string[], ui
     return null;
   }
 }
+
+export const deleteLink = async ({ issue, link, uid }: { link: string, issue: string, uid: string }) => {
+  try {
+    const deleteLinkQuery = e.delete(e.Link, () => ({
+      filter_single: { id: link }
+    }));
+
+    await deleteLinkQuery.run(dbClient);
+
+    const updatedIssueQuery = e.select(e.Issue, () => ({
+      ...e.Issue["*"],
+      owner: {
+        ...e.User["*"],
+      },
+      labels: {
+        ...e.Label["*"],
+      },
+      links: {
+        ...e.Link["*"],
+      },
+      filter_single: { id: issue },
+    }));
+
+
+    const result = await updatedIssueQuery.run(dbClient);
+    await getAllIssues({ uid });
+
+    return result;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
