@@ -2,8 +2,14 @@ import e from "../dbschema/edgeql-js";
 import { createClient } from "edgedb";
 import { LabelInput } from "../utils/types";
 import { io } from "../";
+import dotenv from "dotenv";
 
-const dbClient = createClient();
+dotenv.config();
+
+const dbClient = createClient({
+  instanceName: process.env.EDGEDB_INSTANCE,
+  secretKey: process.env.EDGEDB_SECRET_KEY
+});
 
 export const getAllIssues = async ({ uid }: { uid: string }) => {
   const query = e.select(e.Issue, (issue) => ({

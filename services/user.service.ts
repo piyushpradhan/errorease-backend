@@ -1,6 +1,12 @@
 import e, { createClient } from "../dbschema/edgeql-js";
+import dotenv from "dotenv";
 
-const dbClient = createClient()
+dotenv.config();
+
+const dbClient = createClient({
+  instanceName: process.env.EDGEDB_INSTANCE,
+  secretKey: process.env.EDGEDB_SECRET_KEY
+});
 
 export const getUserDetails = async ({ uid }: { uid: string }) => {
   try {

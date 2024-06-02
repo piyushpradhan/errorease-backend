@@ -1,8 +1,14 @@
 import e, { createClient } from "../dbschema/edgeql-js";
 import * as R from "ramda";
 import { getAllIssues } from "./issues.service";
+import dotenv from "dotenv";
 
-const dbClient = createClient();
+dotenv.config();
+
+const dbClient = createClient({
+  instanceName: process.env.EDGEDB_INSTANCE,
+  secretKey: process.env.EDGEB_SECRET_KEY
+});
 
 export const createLink = async ({ id, url, note }: { id: string, url: string, note?: string }) => {
   try {
