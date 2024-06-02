@@ -167,18 +167,66 @@ export const updateIssue = async ({
     });
   }
 
-  const updateIssueQuery = e.update(e.Issue, () => ({
-    filter_single: { id },
-    set: {
-      title,
-      description,
-      labels,
-      is_active: isActive,
-      issue_map: issueMap,
-    },
-  }));
+  if (labels && labels.length > 0) {
+    const updateLabelQuery = e.params(
+      {
+        labels: e.array(
+          e.tuple({
+            name: e.str,
+          }),
+        ),
+        currentUserId: e.str,
+        issueId: e.uuid,
+      },
+      (params) =>
+        e.for(e.array_unpack(params.labels), (label) =>
+          e
+            .insert(e.Label, {
+              name: label.name,
+              owner: e.select(e.User, () => ({
+                filter_single: { uid: params.currentUserId },
+              })),
+              issue: e.select(e.Issue, () => ({
+                filter_single: { id: params.issueId },
+              })),
+            })
+            .unlessConflict((dbLabel) => ({
+              on: dbLabel.name,
+              else: e.update(e.Label, () => ({
+                filter_single: { name: label.name },
+                set: {
+                  issue: {
+                    "+=": e.select(e.Issue, () => ({
+                      filter_single: { id: params.issueId },
+                    })),
+                  },
+                },
+              })),
+            })),
+        ),
+    );
 
-  await updateIssueQuery.run(dbClient);
+
+    await updateLabelQuery.run(dbClient, {
+      labels: labels.map((label) => ({ name: label })),
+      currentUserId: uid,
+      issueId: id,
+    });
+  }
+
+  if (title || description || isActive || issueMap) {
+    const updateIssueQuery = e.update(e.Issue, () => ({
+      filter_single: { id },
+      set: {
+        title,
+        description,
+        is_active: isActive,
+        issue_map: issueMap,
+      },
+    }));
+
+    await updateIssueQuery.run(dbClient);
+  }
 
   const updatedIssueQuery = e.select(e.Issue, () => ({
     ...e.Issue["*"],

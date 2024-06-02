@@ -45,7 +45,7 @@ export const updateIssue = async (request: Request, response: Response) => {
 
   if (user) {
     const updatedIssue = await updateIssueService({
-      uid: user.id,
+      uid: user.id ?? user.user.id,
       id,
       title,
       description,
