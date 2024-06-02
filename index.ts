@@ -9,7 +9,6 @@ import router from "./routes/index";
 import "./strategies/passport-github";
 import cookieParser from "cookie-parser";
 import { createServer } from "http";
-import { getAllIssues } from "services/issues.service";
 
 dotenv.config();
 
@@ -47,7 +46,8 @@ const httpServer = createServer(app);
 
 export const io = new Server(httpServer, {
   cors: {
-    origin: "*"
+    origin: "*",
+    credentials: true,
   }
 });
 
