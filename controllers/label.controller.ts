@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { generateResponse } from "utils/response";
+import { generateResponse } from "../utils/response";
 import { getAllLabels as getAllLabelsService } from "../services/label.service";
 
 export const getAllLabels = async (request: Request, response: Response) => {
