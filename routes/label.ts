@@ -6,4 +6,4 @@ const router: Router = express.Router();
 
 router.get("/", ensureAuthenticated, getAllLabels);
 
-export default Router;
+export default router;
