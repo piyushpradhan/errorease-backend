@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { getAllIssues, createIssue, updateIssue, resolveIssue, updateIssueActiveStatus } from "../controllers/issues.controller";
+import { getAllIssues, createIssue, updateIssue, resolveIssue, updateIssueActiveStatus } from "../controllers/issue.controller";
 import { ensureAuthenticated } from "../middlewares/auth";
 
 const router: Router = express.Router();

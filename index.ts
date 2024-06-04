@@ -51,8 +51,4 @@ export const io = new Server(httpServer, {
   }
 });
 
-io.on("connection", (socket) => {
-  socket.emit("test", "test updated it");
-});
-
 httpServer.listen(process.env.PORT || 3000, () => { });
