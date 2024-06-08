@@ -26,3 +26,19 @@ export const getAllLabels = async ({ uid }: { uid: string }) => {
   return labels || [];
 }
 
+export const removeLabelFromIssue = async ({ uid, issueId, labelId }: { uid: string, issueId: string, labelId: string }) => {
+  const query = e.update(e.Label, () => ({
+    filter_single: { id: labelId },
+    set: {
+      issue: {
+        "-=": e.select(e.Issue, () => ({
+          filter_single: { id: issueId }
+        }))
+      }
+    }
+  }));
+
+  await query.run(dbClient);
+
+  return true;
+}
