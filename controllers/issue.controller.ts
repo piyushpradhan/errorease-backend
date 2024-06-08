@@ -10,6 +10,7 @@ import { generateResponse } from "../utils/response";
 
 export const getAllIssues = async (request: Request, response: Response) => {
   const user = request.user as any;
+  console.log("does this work");
   if (user) {
     const issues = await getAllIssuesService({ uid: user.id });
     const result = generateResponse({ data: issues });
