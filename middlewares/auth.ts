@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
+import jwt, { JwtPayload, TokenExpiredError, VerifyErrors } from "jsonwebtoken";
 import { extractTokensFromBearer } from "../utils/token";
 
 export const ensureAuthenticated = (
@@ -30,7 +30,7 @@ export const ensureAuthenticated = (
     process.env.ACCESS_TOKEN_SECRET,
     (error: VerifyErrors | null, user: JwtPayload | string | undefined) => {
       if (error) {
-        if (error.message === "jwt expired") {
+        if (error.message === 'jwt expired') {
           return verifyRefreshToken(request, response, next, refreshToken);
         }
         return response.sendStatus(401);
@@ -64,9 +64,11 @@ const verifyRefreshToken = (
       }
 
       // Generate and set a new access token
-      const newAccessToken = jwt.sign({ user }, process.env.ACCESS_TOKEN_SECRET || "", { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
-      response.cookie("access_token", newAccessToken, { httpOnly: true });
-
+      const newAccessToken = jwt.sign({ id: user }, process.env.ACCESS_TOKEN_SECRET || "", { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
+      const newRefreshToken = jwt.sign({ id: user }, process.env.REFRESH_TOKEN_SECRET || "", { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
+      response.setHeader("Set-Cookie", `access_token=${newAccessToken};refresh_token=${newRefreshToken}`);
+      response.cookie("access_token", newAccessToken);
+      response.cookie("refresh_token", newRefreshToken);
       request.user = user;
       next();
     },
